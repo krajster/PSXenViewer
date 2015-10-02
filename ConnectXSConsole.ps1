@@ -1,17 +1,16 @@
 #
-# Name			: ConnectXSConsole.ps1
+# Name			    : ConnectXSConsole.ps1
 # Description   : Connects to the console of a VM hosted on a XenServer hypervisor
-# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/
-# Version		: 1.0, 2 february 2012
+# Author 		    : initial code Ingmar Verheij - http://www.ingmarverheij.com/ - now Evgenii Krainiukov
+# Version		    : 1.1, 02 october 2015
 #
-# Requires		: plink (a command-line interface to the puTTY back ends)
-#				  http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+# Requires	    : plink (a command-line interface to the puTTY back ends)
+#				        http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 #
-#				  TightVNC Viewer
-#				  http://www.tightvnc.com
+#				        TightVNC Viewer
+#				        http://www.tightvnc.com
 #
-# Todo			: Only Windows virtual machines work, other (linux, etc.) use 
-#				  vncterm, which require to resolve the correct PID
+# Todo			    : Work with VM Windows, Linux, etc.
 #
 
 function get-ProgramFilesDir{
@@ -225,4 +224,4 @@ $processVNCViewer.WaitForExit()
 
 #Kill the SSH tunnel
 #===================
-$processPLink.Kill()
+$processPLink.Kill()o
