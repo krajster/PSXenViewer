@@ -43,7 +43,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
 
 #Region PrequisiteCheck
    #Check number of arguments
-   If ($args.count -lt 4)
+   If ($args.count -lt 0)
    {
       Write-Host "Usage"
       Write-Host "powershell.exe .\ConsoleConnect.ps1 (XenServerPoolMaster) (XenServerUsername) (XenServerPassword) (VMName) [CustomFieldName] [CustomFieldValue]"
@@ -61,13 +61,14 @@ function StartProcess([String]$FileName, [String]$Arguments){
    $vncUse8Bit = $true
    
    #Executables
-   $strExecutablePLink=(Split-Path -parent $MyInvocation.MyCommand.Definition) + '\plink.exe'
+   $strExecutablePLink='c:\windows\system32\plink.exe'
    if (is64bit -eq $true) {
-      $strExectableVNCViewer=(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\TightVNC').Path+'\vncviewer.exe'
+      #$strExectableVNCViewer=(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\TightVNC').Path+'\vncviewer.exe'
+      $strExectableVNCViewer="C:\Program Files (x86)\TightVNC\vncviewer.exe"
    }
    else
    {
-      $strExectableVNCViewer=(Get-ItemProperty -Path 'HKLM:\SOFTWARE\TightVNC').Path+'\vncviewer.exe'
+      $strExectableVNCViewer="C:\Program Files (x86)\TightVNC\vncviewer.exe"
    }
    
    #File paths
@@ -76,10 +77,15 @@ function StartProcess([String]$FileName, [String]$Arguments){
    $strFileQueryPort = 'QueryPort'
    
    #Script variables
-   $XenServerHost=$args[0]
-   $XenServerUsername=$args[1]
-   $XenServerPassword=$args[2]
-   $VirtualMachineName=$args[3]
+   #$XenServerHost=$args[0]
+   $XenServerHost=Read-Host -Prompt 'Input XenServer pool'   
+   $VirtualMachineName=Read-Host -Prompt 'VM name with UpperCase'      
+   $XenServerUsername='root'
+   #$XenServerPassword=$args[2]
+   $c=get-credential root
+   $p=$c.getnetworkcredential().password
+   $XenServerPassword=$p
+   #$VirtualMachineName=$args[3]
    If ($args.count -ge 6) {
    		$CustomFieldName=$args[4]
    		$CustomFieldValue=$args[5]
@@ -114,7 +120,7 @@ $process.StandardInput.WriteLine('y')
 #Create a script to query a XenServer where the VM is hosted
 #----------------------------------------------------------
 New-Item $strPathTemp -Name $strFileQueryHost -type file -Force  | Out-Null
-Add-Content ($strPathTemp + '\' + $strFileQueryHost) -Value ('varResidentOnUUID=$(xe vm-list '+$strFilterVM+' os-version:distro="windows" params=resident-on --minimal)')
+Add-Content ($strPathTemp + '\' + $strFileQueryHost) -Value ('varResidentOnUUID=$(xe vm-list '+$strFilterVM+' params=resident-on --minimal)')
 Add-Content ($strPathTemp + '\' + $strFileQueryHost) -Value ('varResidentOnIP=$(xe pif-list management=true params=IP host-uuid=$varResidentOnUUID --minimal)')
 Add-Content ($strPathTemp + '\' + $strFileQueryHost) -Value ('echo $varResidentOnIP')
 
@@ -146,14 +152,15 @@ else {
 #----------------------------------------------------------------------------------------------
 New-Item $strPathTemp -Name $strFileQueryPort -type file -Force | Out-Null
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomPrefix=qemu-dm-')
-Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomId=$(xe vm-list '+$strFilterVM+' os-version:distro="windows" params=dom-id --minimal)')
+Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomId=$(xe vm-list '+$strFilterVM+' params=dom-id --minimal)')
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('[ -z $varDomId ] && (varDomPrefix=vncterm;varDomId=$(xe vm-list name-label="' + $VirtualMachineName + '" other-config:XenCenter.CustomFields.' + $CustomFieldName + '=' + $CustomFieldValue + ' params=dom-id --minimal))')
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varTCPPort=$(netstat -lp|grep -w $varDomPrefix$varDomId|awk ''{print $4}''|cut -d: -f2)')
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('echo $varTCPPort')
 
 #Run the script on the specified XenServer
 #-----------------------------------------
-$process = StartProcess $strExecutablePLink (" -l " + $XenServerUsername + " -pw " + $XenServerPassword + " " +  $XenServerHost + " -m " + ($strPathTemp + '\' + $strFileQueryPort))
+$process = StartProcess $strExecutablePLink (" -l " + $XenServerUsername + " -pw " + $XenServerPassword + " " +  $XenServerHostRunningVM + " -m " + ($strPathTemp + '\' + $strFileQueryPort))
+$process.StandardInput.WriteLine('y')
 $VirtualMachineVNCPort = $process.StandardOutput.ReadLine()
 Remove-Item ($strPathTemp+'\'+$strFileQueryPort)
 
@@ -175,8 +182,7 @@ else {
 
 #Open an SSH tunnel to map the port to the localhost
 #===================================================
-$processPLink=StartProcess $strExecutablePLink (' -N -l ' + $XenServerUsername + ' -pw ' + $XenServerPassword + ' ' +  $XenServerHost + ' -L ' + $VirtualMachineVNCPort +':localhost:'+$VirtualMachineVNCPort +' '+$XenServerHostRunningVM) 
-
+$processPLink=StartProcess $strExecutablePLink (' -N -l ' + $XenServerUsername + ' -pw ' + $XenServerPassword + ' ' +  $XenServerHostRunningVM + ' -L ' + $VirtualMachineVNCPort +':localhost:'+$VirtualMachineVNCPort +' '+$XenServerHostRunningVM) 
 
 #Configure VNC to use 8 bit (if necessary)
 #=========================================
