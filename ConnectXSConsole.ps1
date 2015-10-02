@@ -1,19 +1,19 @@
 #
-# Name			: ConnectXSConsole.ps1
+# Name			    : ConnectXSConsole.ps1
 # Description   : Connects to the console of a VM hosted on a XenServer hypervisor
-# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/
-# Version		: 1.0, 2 february 2012
+# Author 		    : Ingmar Verheij - http://www.ingmarverheij.com/
+# Version		    : 1.0, 2 february 2012
 #
-# Requires		: plink (a command-line interface to the puTTY back ends)
-#               c:\winodws\system32\plink.exe
-#				  http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+# Requires		  : plink (a command-line interface to the puTTY back ends)
+#                 c:\winodws\system32\plink.exe
+#				          http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 #
-#				  TightVNC Viewer
-#				  http://www.tightvnc.com
-#         TightVNC 1.3.10
+#				          TightVNC Viewer
+#				          http://www.tightvnc.com
+#                 TightVNC 1.3.10
 #
-# Todo			: Only Windows virtual machines work, other (linux, etc.) use 
-#				  vncterm, which require to resolve the correct PID
+# Todo			    : Only Windows virtual machines work, other (linux, etc.) use 
+#				          vncterm, which require to resolve the correct PID
 #
 
 function get-ProgramFilesDir{
@@ -56,7 +56,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
       Write-Host "Press any key to continue ..."
       $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
       break
-   }
+   }*
 #EndRegion
 #Region Define variables and read
    #Constants
