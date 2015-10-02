@@ -5,10 +5,12 @@
 # Version		: 1.0, 2 february 2012
 #
 # Requires		: plink (a command-line interface to the puTTY back ends)
+#               c:\winodws\system32\plink.exe
 #				  http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 #
 #				  TightVNC Viewer
 #				  http://www.tightvnc.com
+#         TightVNC 1.3.10
 #
 # Todo			: Only Windows virtual machines work, other (linux, etc.) use 
 #				  vncterm, which require to resolve the correct PID
