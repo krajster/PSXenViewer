@@ -1,19 +1,17 @@
 #
-# Name			    : ConnectXSConsole.ps1
+# Name			: ConnectXSConsole.ps1
 # Description   : Connects to the console of a VM hosted on a XenServer hypervisor
-# Author 		    : Ingmar Verheij - http://www.ingmarverheij.com/
-# Version		    : 1.0, 2 february 2012
+# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/
+# Version		: 1.0, 2 february 2012
 #
-# Requires		  : plink (a command-line interface to the puTTY back ends)
-#                 c:\winodws\system32\plink.exe
-#				          http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+# Requires		: plink (a command-line interface to the puTTY back ends)
+#				  http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 #
-#				          TightVNC Viewer
-#				          http://www.tightvnc.com
-#                 TightVNC 1.3.10
+#				  TightVNC Viewer
+#				  http://www.tightvnc.com
 #
-# Todo			    : Only Windows virtual machines work, other (linux, etc.) use 
-#				          vncterm, which require to resolve the correct PID
+# Todo			: Only Windows virtual machines work, other (linux, etc.) use 
+#				  vncterm, which require to resolve the correct PID
 #
 
 function get-ProgramFilesDir{
@@ -56,7 +54,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
       Write-Host "Press any key to continue ..."
       $x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
       break
-   }*
+   }
 #EndRegion
 #Region Define variables and read
    #Constants
@@ -67,6 +65,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
    if (is64bit -eq $true) {
       #$strExectableVNCViewer=(Get-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\TightVNC').Path+'\vncviewer.exe'
       $strExectableVNCViewer="C:\Program Files (x86)\TightVNC\vncviewer.exe"
+      #$strExectableVNCViewer="C:\Program Files\TightVNC\tvnviewer.exe"
    }
    else
    {
@@ -77,6 +76,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
    $strPathTemp = $Env:TEMP
    $strFileQueryHost = 'QueryHost'
    $strFileQueryPort = 'QueryPort'
+   $strFileQueryXSVersion = 'QueryXSVersion'
    
    #Script variables
    #$XenServerHost=$args[0]
@@ -146,6 +146,23 @@ else {
 }
 
 
+#Determine version XenServerHostRunningVM
+#==============================================
+#
+#Create a script to query the XenServer where the VM is running on what version XenServer API
+#----------------------------------------------------------------------------------------------
+New-Item $strPathTemp -Name $strFileQueryXSVersion -type file -Force | Out-Null
+Add-Content ($strPathTemp + '\' + $strFileQueryXSVersion) -Value ('varXSVersion=$(cat /etc/xensource-inventory |grep PRODUCT_VERSION= |cut -d= -f2 |cut -c 2-2)')
+Add-Content ($strPathTemp + '\' + $strFileQueryXSVersion) -Value ('echo $varXSVersion')
+
+#Run the script on the specified XenServer
+#-----------------------------------------
+$process = StartProcess $strExecutablePLink (" -l " + $XenServerUsername + " -pw " + $XenServerPassword + " " +  $XenServerHostRunningVM + " -m " + ($strPathTemp + '\' + $strFileQueryXSVersion))
+$process.StandardInput.WriteLine('y')
+$XenServerVersion = $process.StandardOutput.ReadLine()
+Remove-Item ($strPathTemp+'\'+$strFileQueryXSVersion)
+Write-Host "The version Citrix XenServer where running '"$VirtualMachineName"' is "$XenServerVersion
+
 
 #Determine the port nummer where VNC is running
 #==============================================
@@ -153,7 +170,13 @@ else {
 #Create a script to query the XenServer where the VM is running on what TCP port VNC is running
 #----------------------------------------------------------------------------------------------
 New-Item $strPathTemp -Name $strFileQueryPort -type file -Force | Out-Null
-Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomPrefix=qemu-dm-')
+if ($XenServerVersion -gt 5) {
+    Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomPrefix=qemu-dm-')
+}
+else {
+    Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomPrefix=qemu.')
+}
+
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varDomId=$(xe vm-list '+$strFilterVM+' params=dom-id --minimal)')
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('[ -z $varDomId ] && (varDomPrefix=vncterm;varDomId=$(xe vm-list name-label="' + $VirtualMachineName + '" other-config:XenCenter.CustomFields.' + $CustomFieldName + '=' + $CustomFieldValue + ' params=dom-id --minimal))')
 Add-Content ($strPathTemp + '\' + $strFileQueryPort) -Value ('varTCPPort=$(netstat -lp|grep -w $varDomPrefix$varDomId|awk ''{print $4}''|cut -d: -f2)')
