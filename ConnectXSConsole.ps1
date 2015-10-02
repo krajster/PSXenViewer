@@ -1,7 +1,7 @@
 #
 # Name			: ConnectXSConsole.ps1
 # Description   : Connects to the console of a VM hosted on a XenServer hypervisor
-# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/
+# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/ special thanks for initial
 # Version		: 1.0, 2 february 2012
 #
 # Requires		: plink (a command-line interface to the puTTY back ends)
