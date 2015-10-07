@@ -1,16 +1,17 @@
 #
-# Name			    : ConnectXSConsole.ps1
+# Name			: ConnectXSConsole.ps1
 # Description   : Connects to the console of a VM hosted on a XenServer hypervisor
-# Author 		    : initial code Ingmar Verheij - http://www.ingmarverheij.com/ - now Evgenii Krainiukov
-# Version		    : 1.1, 02 october 2015
+# Author 		: Ingmar Verheij - http://www.ingmarverheij.com/
+# Version		: 1.0, 2 february 2012
 #
-# Requires	    : plink (a command-line interface to the puTTY back ends)
-#				        http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
+# Requires		: plink (a command-line interface to the puTTY back ends)
+#				  http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
 #
-#				        TightVNC Viewer
-#				        http://www.tightvnc.com
+#				  TightVNC Viewer
+#				  http://www.tightvnc.com
 #
-# Todo			    : Work with VM Windows, Linux, etc.
+# Todo			: Only Windows virtual machines work, other (linux, etc.) use 
+#				  vncterm, which require to resolve the correct PID
 #
 
 function get-ProgramFilesDir{
@@ -81,10 +82,11 @@ function StartProcess([String]$FileName, [String]$Arguments){
    #$XenServerHost=$args[0]
    $XenServerHost=Read-Host -Prompt 'Input XenServer pool'   
    $VirtualMachineName=Read-Host -Prompt 'VM name with UpperCase'      
-   $XenServerUsername='root'
-   #$XenServerPassword=$args[2]
+      #$XenServerPassword=$args[2]
    $c=get-credential root
    $p=$c.getnetworkcredential().password
+   $u=$c.Username
+   $XenServerUsername=$u
    $XenServerPassword=$p
    #$VirtualMachineName=$args[3]
    If ($args.count -ge 6) {
@@ -224,4 +226,4 @@ $processVNCViewer.WaitForExit()
 
 #Kill the SSH tunnel
 #===================
-$processPLink.Kill()o
+$processPLink.Kill()
