@@ -11,8 +11,7 @@
 #				  http://www.tightvnc.com
 #                                http://www.tightvnc.com/download/1.3.10/tightvnc-1.3.10-setup.exe
 #
-# Todo			: Only Windows virtual machines work, other (linux, etc.) use 
-#				  vncterm, which require to resolve the correct PID
+#
 #
 
 function get-ProgramFilesDir{
