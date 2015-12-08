@@ -9,7 +9,7 @@
 #
 #				  TightVNC Viewer
 #				  http://www.tightvnc.com
-#                                http://www.tightvnc.com/download/1.3.10/tightvnc-1.3.10-setup.exe
+#                                 http://www.tightvnc.com/download/1.3.10/tightvnc-1.3.10-setup.exe
 #
 #
 #
