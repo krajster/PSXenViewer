@@ -69,7 +69,7 @@ function StartProcess([String]$FileName, [String]$Arguments){
    }
    else
    {
-      $strExectableVNCViewer="C:\Program Files (x86)\TightVNC\vncviewer.exe"
+      $strExectableVNCViewer="C:\Program Files\TightVNC\vncviewer.exe"
    }
    
    #File paths
