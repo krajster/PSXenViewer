@@ -153,7 +153,7 @@ else {
 #Create a script to query the XenServer where the VM is running on what version XenServer API
 #----------------------------------------------------------------------------------------------
 New-Item $strPathTemp -Name $strFileQueryXSVersion -type file -Force | Out-Null
-Add-Content ($strPathTemp + '\' + $strFileQueryXSVersion) -Value ('varXSVersion=$(cat /etc/xensource-inventory |grep PRODUCT_VERSION= |cut -d= -f2 |cut -c 2-2)')
+Add-Content ($strPathTemp + '\' + $strFileQueryXSVersion) -Value ('varXSVersion=$(grep PRODUCT_VERSION= /etc/xensource-inventory |cut -d= -f2 |cut -c 2-2)')
 Add-Content ($strPathTemp + '\' + $strFileQueryXSVersion) -Value ('echo $varXSVersion')
 
 #Run the script on the specified XenServer
